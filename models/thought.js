@@ -3,7 +3,7 @@ const moment = require('moment');
 // This will define Mongoose
 const { Schema, model } = require('mongoose');
 
-const reactionSchema = require('./Reaction');
+const reactionSchema = require('./reaction');
 
 //  This will define the shape of the documents within the collection.
 const thoughtSchema = new Schema(
