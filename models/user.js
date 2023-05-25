@@ -1,40 +1,64 @@
-const moment = require('moment');
-
 // This will define Mongoose
-const { Schema, Types } = require('mongoose');
+
+const { Schema, model } = require('mongoose');
+
 
 //  This will define the shape of the documents within the collection.
-const reactionSchema = new Schema(
+const userSchema = new Schema(
     {
-
-        reactionId: {
-
-            type: Schema.Types.ObjectId,
-            default: () => new Types.ObjectId(),
+      username: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+      },
+      email: {
+        type: String,
+        required: true,
+        unique: true,
+        match: [/.+@.+\..+/, 'Must match an email address!'],
+      },
+      thoughts: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Thought',
         },
-
-        reactionBody: {
-            type: String,
-            required: true,
-            maxlength: 280,
+      ],
+      friends: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
         },
-        username: {
-            type: String,
-            required: true,
-        },
-        createdAt: {
-            type: Date,
-            default: Date.now,
-            get: (timestamp) => moment(timestamp).format('MMM Do, YYYY [at] hh:mm a'),
-        },
+      ],
     },
     {
-        toJSON: {
-            getters: true,
-        },
-
-        id: false,
+      toJSON: {
+        virtuals: true,
+      },
+      id: false,
     }
-);
+  );
+  
+  // Create a virtual property `friendCount` that gets the amount of friends
+  userSchema.virtual('friendCount').get(function () {
+    return this.friends.length;
+  });
+// Add a 'pre' hook on the 'remove' event for the userSchema
+  userSchema.pre('remove', async function(next) {
+    try {
+      // Before removing the user, find and delete all thoughts where the 'username' field matches the user's username
+      await Thought.deleteMany({ username: this.username });
 
-module.exports = reactionSchema;
+      // Call the next middleware or function in the pipeline
+      next();
+    } catch (error) {
+
+      // If there's an error, call the next function with the error object
+      next(error);
+    }
+  });
+  
+    // userSchema is the name of the schema we are using to create a new instance of the model
+  const User = model('User', userSchema);
+  
+  module.exports = User;

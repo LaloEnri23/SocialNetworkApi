@@ -1,7 +1,7 @@
 
 // Import the required dependencies
 const express = require('express');
-const db = require('./config/connnection');
+const db = require('./config/connection');
 const routes = require('./routes');
 
 // Set the server port, use environment variable PORT if available or default to 3001
@@ -15,7 +15,7 @@ app.use(routes);
 
 // Initialize the server once a successful database connection is established
 db.once('open', () => {
-    app.listen(PORT, () => {
+  app.listen(PORT, () => {
     console.log(`API server running on port ${PORT}!`);
-    });
+  });
 });
